@@ -1,11 +1,11 @@
 import { createBrowserRouter } from "react-router";
 import SearchPage from "../pages/SearchPage";
 import MovieDetails from "../pages/MovieDetails";
-import WatchListPage from "../pages/WatchlistPage";
 import LoginPage from "../pages/LoginPage";
 import MainLayout from "../layout/MainLayout";
 import PrivateRoute from "../components/PrivateRoute";
 import Movies from "../pages/Movies";
+import WatchListPage from "../pages/WatchListPage";
 
 export const router = createBrowserRouter([
   {

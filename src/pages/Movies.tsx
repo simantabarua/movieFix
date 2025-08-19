@@ -1,4 +1,5 @@
 import { useGetPopularMoviesQuery } from "../redux/features/movies/movies.api";
+import type { IMovie } from "../types/movie";
 
 const Movies = () => {
   const { data, isLoading, error } = useGetPopularMoviesQuery(1);
@@ -8,7 +9,7 @@ const Movies = () => {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
-      {data?.results.map((movie) => (
+      {data?.results.map((movie: IMovie) => (
         <div key={movie.id} className="bg-gray-800 rounded p-2">
           <img
             src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
