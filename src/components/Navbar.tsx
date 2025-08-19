@@ -22,24 +22,24 @@ export default function Navbar() {
             isButton: true,
             label: "Logout",
             onClick: handleLogout,
-            className: "hover:text-yellow-400 cursor-pointer",
+            className: "hover:text-red-500 cursor-pointer",
           },
         ]
       : [{ to: "/login", label: "Sign In" }]),
   ];
 
   return (
-    <nav className="bg-gray-900 text-white px-4 py-3 flex items-center justify-between shadow-lg">
+    <nav className="bg-black/90 text-white px-6 py-4 flex items-center justify-between shadow-lg fixed w-full top-0 z-50">
       {/* Logo */}
-      <div className="text-2xl font-bold tracking-wide">
+      <div className="text-3xl font-bold tracking-tight">
         <Link to="/" className="flex items-center">
-          <span className="text-yellow-400">Movie</span>Flix
+          <span className="text-red-600">Movie</span>Flix
         </Link>
       </div>
 
       {/* Mobile menu toggle */}
       <button
-        className="sm:hidden text-2xl focus:outline-none"
+        className="sm:hidden text-2xl focus:outline-none hover:text-red-600 transition-colors"
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         aria-label="Toggle navigation menu"
       >
@@ -47,20 +47,23 @@ export default function Navbar() {
       </button>
 
       <ul
-        className={`flex flex-col sm:flex-row gap-4 sm:gap-8 absolute sm:static top-16 left-0 w-full sm:w-auto 
-                   bg-gray-900 sm:bg-transparent p-4 sm:p-0 transition-all duration-300 ease-in-out z-10
+        className={`flex flex-col sm:flex-row gap-6 sm:gap-10 absolute sm:static top-16 left-0 w-full sm:w-auto 
+                   bg-black/95 sm:bg-transparent p-6 sm:p-0 transition-all duration-300 ease-in-out z-40
                    ${isMenuOpen ? "block" : "hidden sm:flex"}`}
       >
         {navLinks.map((link, index) => (
           <li key={index} className="text-center sm:text-left">
             {link.isButton ? (
-              <button onClick={link.onClick} className={link.className}>
+              <button
+                onClick={link.onClick}
+                className="text-gray-300 hover:text-red-500 font-medium transition-colors duration-200"
+              >
                 {link.label}
               </button>
             ) : (
               <Link
                 to={link.to as string}
-                className="hover:text-yellow-400 transition-colors duration-200"
+                className="text-gray-300 hover:text-red-500 font-medium transition-colors duration-200"
               >
                 {link.label}
               </Link>
