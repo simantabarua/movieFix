@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 type FormValues = {
   email: string;
   password: string;
+  name?: string;
 };
 
 const LoginPage: React.FC = () => {
@@ -17,20 +18,22 @@ const LoginPage: React.FC = () => {
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user, loginEmail, registerEmail, loginGoogle, logout } = useAuth();
+  const { loginEmail, registerEmail, loginGoogle } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: string })?.from || "/watchlist";
 
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
     setError(null);
     try {
       if (isRegister) {
-        await registerEmail(data.email, data.password);
+        await registerEmail(data.email, data.password, data.name as string);
       } else {
         await loginEmail(data.email, data.password);
       }
-      navigate("/watchlist");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      navigate(from, { replace: true }); 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -43,22 +46,41 @@ const LoginPage: React.FC = () => {
     setError(null);
     try {
       await loginGoogle();
-      navigate("/watchlist");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      navigate(from, { replace: true });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       setError(e.message);
     } finally {
       setLoading(false);
     }
   };
-
   return (
-    <div className=" flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-black/80 rounded-lg p-8 shadow-2xl">
-        <h2 className="text-3xl font-bold text-white mb-6 text-center">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-gray-900 via-black to-gray-900 px-4">
+      <div className="max-w-md w-full bg-black/70 backdrop-blur-md rounded-xl p-8 shadow-2xl border border-gray-800">
+        <h2 className="text-3xl font-extrabold text-white mb-6 text-center tracking-wide">
           {isRegister ? "Create Account" : "Sign In"}
         </h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {isRegister && (
+            <div>
+              <label className="block text-sm font-medium text-gray-300">
+                Name
+              </label>
+              <input
+                type="text"
+                {...register("name", { required: "Name is required" })}
+                className="w-full mt-2 bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
+                placeholder="Your name"
+              />
+              {errors.name && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.name.message}
+                </p>
+              )}
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-gray-300">
               Email
@@ -66,8 +88,8 @@ const LoginPage: React.FC = () => {
             <input
               type="email"
               {...register("email", { required: "Email is required" })}
-              className="w-full mt-1 bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-600"
-              placeholder="Enter your email"
+              className="w-full mt-2 bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
+              placeholder="Your email"
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">
@@ -75,6 +97,7 @@ const LoginPage: React.FC = () => {
               </p>
             )}
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-300">
               Password
@@ -83,10 +106,13 @@ const LoginPage: React.FC = () => {
               type="password"
               {...register("password", {
                 required: "Password is required",
-                minLength: 6,
+                minLength: {
+                  value: 6,
+                  message: "Minimum length is 6 characters",
+                },
               })}
-              className="w-full mt-1 bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-600"
-              placeholder="Enter your password"
+              className="w-full mt-2 bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
+              placeholder="Your password"
             />
             {errors.password && (
               <p className="text-red-500 text-sm mt-1">
@@ -94,11 +120,13 @@ const LoginPage: React.FC = () => {
               </p>
             )}
           </div>
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
+          {error && <p className="text-red-500 text-center text-sm">{error}</p>}
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors disabled:opacity-50"
+            className="w-full py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition disabled:opacity-50"
           >
             {loading
               ? "Please wait..."
@@ -107,11 +135,15 @@ const LoginPage: React.FC = () => {
               : "Sign In"}
           </button>
         </form>
-        <div className="my-6 text-center text-gray-400">OR</div>
+
+        <div className="my-6 flex items-center justify-center text-gray-400">
+          <span className="mx-2">OR</span>
+        </div>
+
         <button
           onClick={handleGoogle}
           disabled={loading}
-          className="w-full py-3 border border-gray-600 rounded-lg flex justify-center gap-2 items-center text-white hover:bg-gray-800 transition-colors disabled:opacity-50"
+          className="w-full py-3 flex items-center justify-center gap-3 border border-gray-600 rounded-lg text-white hover:bg-gray-800 transition disabled:opacity-50"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
             <path
@@ -133,23 +165,16 @@ const LoginPage: React.FC = () => {
           </svg>
           Continue with Google
         </button>
-        <div className="mt-6 text-sm flex justify-between items-center text-gray-300">
+
+        <div className="mt-6 text-sm text-gray-300 text-center">
           <button
             onClick={() => setIsRegister((s) => !s)}
-            className="hover:text-white transition-colors"
+            className="hover:text-white font-medium transition"
           >
             {isRegister
               ? "Already have an account? Sign In"
               : "New? Create Account"}
           </button>
-          {user && (
-            <button
-              onClick={logout}
-              className="text-red-500 hover:text-red-400"
-            >
-              Logout
-            </button>
-          )}
         </div>
       </div>
     </div>

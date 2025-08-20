@@ -1,7 +1,9 @@
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
 import { useSearchMoviesQuery } from "../redux/features/movies/movies.api";
 import type { IMovie } from "../types/movie";
+import bg from "../assets/searchbg.jpg";
+import MovieCard from "../components/MovieCard";
+import { FaSearch } from "react-icons/fa";
 
 type SearchForm = {
   query: string;
@@ -23,27 +25,54 @@ const SearchPage = () => {
   };
 
   return (
-    <div className=" py-20 px-6">
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-white mb-6">Search Movies</h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex gap-4 mb-8">
-          <input
-            placeholder="Search movies..."
-            {...register("query")}
-            className="w-full bg-gray-900 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-gray-400"
-          />
+    <div
+      className="relative min-h-screen bg-cover bg-center overflow-auto flex flex-col"
+      style={{ backgroundImage: `url(${bg})` }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/70 to-black/90"></div>
+
+      <div
+        className={`relative z-10 flex flex-col items-center justify-center flex-1 px-4 sm:px-6 animate-fadeIn  ${
+          data?.results?.length ? "mt-20" : "mt-0"
+        }`}
+      >
+        <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-6 sm:mb-8 drop-shadow-lg text-center animate-slideDown">
+          Search Movies
+        </h2>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex w-full max-w-2xl mx-auto animate-slideUp"
+        >
+          <div className="relative flex-grow">
+            <input
+              type="text"
+              value={query}
+              {...register("query")}
+              placeholder="Search for movies..."
+              className="w-full bg-black/60 text-white border border-gray-600 rounded-full pl-12 pr-4 py-3 sm:py-4 focus:outline-none focus:ring-2 focus:ring-red-500 placeholder-gray-400 shadow-lg transition-all duration-300 hover:border-red-500 text-sm sm:text-base"
+            />
+            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <FaSearch className="text-lg sm:text-xl" />
+            </div>
+          </div>
           <button
             type="submit"
-            className="py-3 px-6 rounded bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors"
+            className="ml-2 sm:ml-4 flex items-center justify-center px-4 sm:px-6 rounded-full bg-red-600 text-white font-semibold shadow-lg transition-all duration-300 hover:bg-red-700 hover:scale-105 active:scale-95 text-sm sm:text-base"
           >
-            Search
+            <span className="hidden sm:inline">Search</span>
+            <span className="sm:hidden">
+              <FaSearch />
+            </span>
           </button>
         </form>
+        );
+      </div>
 
+      <div className="relative z-10 max-w-7xl mx-auto w-full pb-20 px-6">
         {isLoading && (
-          <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="flex items-center justify-center min-h-[30vh] animate-fadeIn">
             <div className="relative flex items-center justify-center">
-              <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-14 h-14 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
               <span className="absolute text-white text-sm font-medium">
                 Loading...
               </span>
@@ -52,42 +81,18 @@ const SearchPage = () => {
         )}
 
         {!isLoading && data?.results?.length === 0 && query && (
-          <p className="text-gray-400 text-center text-lg">
+          <p className="text-gray-400 text-center text-lg animate-fadeIn">
             No movies found for "{query}"
           </p>
         )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          {data?.results?.map((movie: IMovie) => (
-            <Link
-              key={movie.id}
-              to={`/movie/${movie.id}`}
-              className="bg-gray-900 rounded-lg overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300"
-            >
-              <img
-                src={
-                  movie.poster_path
-                    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                    : "https://via.placeholder.com/500x750?text=No+Image"
-                }
-                alt={movie.title}
-                className="w-full h-64 object-cover rounded-t-lg"
-              />
-              <div className="p-4">
-                <h2 className="text-white text-base font-semibold truncate">
-                  {movie.title}
-                </h2>
-                <p className="text-gray-400 text-sm mt-1">
-                  {movie.release_date
-                    ? new Date(movie.release_date).getFullYear()
-                    : "N/A"}
-                  {movie.vote_average &&
-                    ` • ${movie.vote_average.toFixed(1)}/10`}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {data?.results && data.results.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 mt-12 animate-fadeIn">
+            {data.results.map((movie: IMovie) => (
+              <MovieCard movie={movie} key={movie.id} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

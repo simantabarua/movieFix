@@ -1,5 +1,9 @@
-
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+} from "firebase/auth";
 import { useAppDispatch, useAppSelector } from "../redux/hook";
 import type { AuthUser } from "../redux/features/auth/auth.types";
 import { loginUser, logoutUser } from "../redux/features/auth/auth.slice";
@@ -21,18 +25,21 @@ export const useAuth = () => {
     localStorage.setItem("user", JSON.stringify(u));
   };
 
-  const registerEmail = async (email: string, password: string) => {
+  const registerEmail = async (
+    email: string,
+    password: string,
+    name: string
+  ) => {
     const res = await createUserWithEmailAndPassword(auth, email, password);
     const u: AuthUser = {
       uid: res.user.uid,
       email: res.user.email,
-      displayName: res.user.displayName,
+      displayName: name,
       photoURL: res.user.photoURL,
     };
     dispatch(loginUser(u));
     localStorage.setItem("user", JSON.stringify(u));
   };
-
   const loginGoogle = async () => {
     const res = await signInWithPopup(auth, googleProvider);
     const u: AuthUser = {

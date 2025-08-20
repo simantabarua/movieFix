@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate } from "react-router";
+import { Navigate, useLocation } from "react-router";
 import { useAppSelector } from "../redux/hook";
 
 type PrivateRouteProps = {
@@ -8,9 +8,10 @@ type PrivateRouteProps = {
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const user = useAppSelector((state) => state.auth.user);
+  const location = useLocation();
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
   return <>{children}</>;

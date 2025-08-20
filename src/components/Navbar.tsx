@@ -1,76 +1,92 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { useAuth } from "../hooks/useAuth";
+import { HiMenuAlt1 } from "react-icons/hi";
+import { HiMiniXMark } from "react-icons/hi2";
+
+import Logo from "./Logo";
+import { AuthButtons } from "./AuthBtn";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
-
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
+  const { user } = useAuth();
 
   const navLinks = [
     { to: "/", label: "Home" },
     { to: "/movies", label: "Movies" },
-    ...(user
-      ? [
-          { to: "/watchlist", label: "Watchlist" },
-          {
-            isButton: true,
-            label: "Logout",
-            onClick: handleLogout,
-            className: "hover:text-red-500 cursor-pointer",
-          },
-        ]
-      : [{ to: "/login", label: "Sign In" }]),
+    ...(user ? [{ to: "/watchlist", label: "My List" }] : []),
   ];
 
   return (
-    <nav className="bg-black/90 text-white px-6 py-4 flex items-center justify-between shadow-lg fixed w-full top-0 z-50">
-      {/* Logo */}
-      <div className="text-3xl font-bold tracking-tight">
-        <Link to="/" className="flex items-center">
-          <span className="text-red-600">Movie</span>Flix
-        </Link>
+    <nav
+      className="bg-black text-white fixed w-full top-0 z-50 bg-opacity-90
+     backdrop-blur-sm transition-all duration-300 px-8 md:px-0"
+    >
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
+          <Logo />
+
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center space-x-8">
+            <div className="flex space-x-6">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className="text-gray-300 hover:text-red-600 font-medium transition-all duration-300 transform  "
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+            <AuthButtons />
+          </div>
+
+          {/* Mobile Menu */}
+          <div className="md:hidden flex items-center gap-4">
+            <AuthButtons />
+            <button
+              className=" text-2xl focus:outline-none transition-all duration-300 transform hover:scale-110"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle navigation menu"
+            >
+              {isMenuOpen ? (
+                <HiMiniXMark className="transition-transform duration-300 rotate-90" />
+              ) : (
+                <HiMenuAlt1 size={24} />
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Mobile menu toggle */}
-      <button
-        className="sm:hidden text-2xl focus:outline-none hover:text-red-600 transition-colors"
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-        aria-label="Toggle navigation menu"
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-500 ease-in-out ${
+          isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        }`}
       >
-        {isMenuOpen ? "✖" : "☰"}
-      </button>
-
-      <ul
-        className={`flex flex-col sm:flex-row gap-6 sm:gap-10 absolute sm:static top-16 left-0 w-full sm:w-auto 
-                   bg-black/95 sm:bg-transparent p-6 sm:p-0 transition-all duration-300 ease-in-out z-40
-                   ${isMenuOpen ? "block" : "hidden sm:flex"}`}
-      >
-        {navLinks.map((link, index) => (
-          <li key={index} className="text-center sm:text-left">
-            {link.isButton ? (
-              <button
-                onClick={link.onClick}
-                className="text-gray-300 hover:text-red-500 font-medium transition-colors duration-200"
-              >
-                {link.label}
-              </button>
-            ) : (
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col space-y-4 mb-6">
+            {navLinks.map((link, index) => (
               <Link
-                to={link.to as string}
-                className="text-gray-300 hover:text-red-500 font-medium transition-colors duration-200"
+                key={link.to}
+                to={link.to}
+                onClick={() => setIsMenuOpen(false)}
+                className={`text-lg text-gray-300 hover:text-white font-medium transition-all duration-300 py-2 transform hover:translate-x-2 ${
+                  isMenuOpen
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 -translate-y-4"
+                }`}
+                style={{
+                  transitionDelay: isMenuOpen ? `${index * 100}ms` : "0ms",
+                }}
               >
                 {link.label}
               </Link>
-            )}
-          </li>
-        ))}
-      </ul>
+            ))}
+          </div>
+        </div>
+      </div>
     </nav>
   );
 }

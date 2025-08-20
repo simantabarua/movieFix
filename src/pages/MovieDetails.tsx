@@ -1,35 +1,47 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useGetMovieDetailsQuery } from "../redux/features/movies/movies.api";
 import { useWatchList } from "../hooks/useWatchList";
+import { useAppSelector } from "../redux/hook";
+import Loader from "../components/Loader";
+import Modal from "../components/Modal";
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: movie, isLoading, error } = useGetMovieDetailsQuery(Number(id));
   const { addToWatchList } = useWatchList();
+  const user = useAppSelector((state) => state.auth.user);
 
-  if (isLoading)
-    return (
-      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-        <div className="relative flex items-center justify-center">
-          <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-          <span className="absolute text-white text-base font-semibold">
-            Loading...
-          </span>
-        </div>
-      </div>
-    );
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+
+  if (isLoading) return <Loader />;
   if (error || !movie)
     return (
-      <div className=" bg-black/90 text-white flex items-center justify-center">
+      <div className="bg-black/90 text-white flex items-center justify-center min-h-screen">
         <p className="text-red-500 text-xl font-semibold">
           Failed to load movie details
         </p>
       </div>
     );
 
+  const handleAddWatchlist = () => {
+    if (!user) {
+      setModalMessage(
+        "You must log in first to add a movie to your watchlist."
+      );
+      setShowModal(true);
+      return;
+    }
+
+    addToWatchList(movie);
+    setModalMessage("Movie added to your watchlist successfully!");
+    setShowModal(true);
+  };
+
   return (
-    <div className="bg-black/95  pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+    <div className="bg-black/95 pt-24 pb-12 px-4 sm:px-6 lg:px-8 min-h-screen">
       <div className="max-w-6xl mx-auto">
         <button
           className="mb-8 flex items-center gap-2 text-gray-300 hover:text-red-600 text-lg font-medium transition-colors duration-200"
@@ -56,10 +68,11 @@ const MovieDetails = () => {
             <div
               className="absolute inset-0 bg-cover bg-center opacity-20"
               style={{
-                backgroundImage: `ur[](https://image.tmdb.org/t/p/w1280${movie.backdrop_path})`,
+                backgroundImage: `url(https://image.tmdb.org/t/p/w1280${movie.backdrop_path})`,
               }}
             ></div>
           )}
+
           <div className="relative flex flex-col lg:flex-row gap-8 p-6 lg:p-8">
             {movie.poster_path ? (
               <img
@@ -75,6 +88,7 @@ const MovieDetails = () => {
 
             <div className="flex-1 text-white">
               <h1 className="text-4xl font-bold mb-4">{movie.title}</h1>
+
               <div className="flex flex-wrap gap-x-6 gap-y-2 text-gray-300 text-sm mb-4">
                 <span>
                   {movie.release_date
@@ -94,6 +108,7 @@ const MovieDetails = () => {
                   <span>Language: {movie.original_Language.toUpperCase()}</span>
                 )}
               </div>
+
               {movie.genre_ids && movie.genre_ids.length > 0 && (
                 <p className="text-gray-300 text-sm mb-4">
                   Genres:{" "}
@@ -103,12 +118,14 @@ const MovieDetails = () => {
                     .join(", ")}
                 </p>
               )}
+
               <p className="text-gray-200 text-base leading-relaxed mb-6">
                 {movie.overview || "No description available."}
               </p>
+
               <div className="flex gap-4">
                 <button
-                  onClick={() => addToWatchList(movie)}
+                  onClick={handleAddWatchlist}
                   className="py-2.5 px-6 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors duration-200"
                 >
                   Add to Watchlist
@@ -118,6 +135,32 @@ const MovieDetails = () => {
           </div>
         </div>
       </div>
+
+      {showModal && (
+        <Modal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          title="Notice"
+        >
+          <p className="text-white text-center">{modalMessage}</p>
+          {modalMessage.includes("log in") && (
+            <div className="mt-4 flex justify-center gap-4">
+              <button
+                onClick={() => navigate("/login")}
+                className="py-2 px-4 bg-red-600 rounded hover:bg-red-700 text-white font-medium transition"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => setShowModal(false)}
+                className="py-2 px-4 bg-gray-700 rounded hover:bg-gray-600 text-white font-medium transition"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </Modal>
+      )}
     </div>
   );
 };
