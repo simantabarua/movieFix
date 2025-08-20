@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useGetMovieDetailsQuery } from "../redux/features/movies/movies.api";
-import { useWatchList } from "../hooks/useWatchList";
-import { useAppSelector } from "../redux/hook";
+import { useAppSelector, useAppDispatch } from "../redux/hook";
+import { addToWatchList } from "../redux/features/watchlist/watchlistSlice";
 import Loader from "../components/Loader";
 import Modal from "../components/Modal";
+import { FaCheck } from "react-icons/fa";
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
   const { data: movie, isLoading, error } = useGetMovieDetailsQuery(Number(id));
-  const { addToWatchList } = useWatchList();
   const user = useAppSelector((state) => state.auth.user);
+  const watchList = useAppSelector((state) => state.watchList.watchList);
 
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
@@ -26,6 +29,8 @@ const MovieDetails = () => {
       </div>
     );
 
+  const isInWatchlist = watchList.includes(movie.id);
+
   const handleAddWatchlist = () => {
     if (!user) {
       setModalMessage(
@@ -35,14 +40,17 @@ const MovieDetails = () => {
       return;
     }
 
-    addToWatchList(movie);
-    setModalMessage("Movie added to your watchlist successfully!");
-    setShowModal(true);
+    if (!isInWatchlist) {
+      dispatch(addToWatchList(movie.id));
+      setModalMessage("Movie added to your watchlist successfully!");
+      setShowModal(true);
+    }
   };
 
   return (
     <div className="bg-black/95 pt-24 pb-12 px-4 sm:px-6 lg:px-8 min-h-screen">
       <div className="max-w-6xl mx-auto">
+        {/* Back button */}
         <button
           className="mb-8 flex items-center gap-2 text-gray-300 hover:text-red-600 text-lg font-medium transition-colors duration-200"
           onClick={() => navigate(-1)}
@@ -63,6 +71,7 @@ const MovieDetails = () => {
           Back
         </button>
 
+        {/* Movie content */}
         <div className="relative bg-gray-900 rounded-xl shadow-2xl overflow-hidden">
           {movie.backdrop_path && (
             <div
@@ -70,7 +79,7 @@ const MovieDetails = () => {
               style={{
                 backgroundImage: `url(https://image.tmdb.org/t/p/w1280${movie.backdrop_path})`,
               }}
-            ></div>
+            />
           )}
 
           <div className="relative flex flex-col lg:flex-row gap-8 p-6 lg:p-8">
@@ -89,6 +98,7 @@ const MovieDetails = () => {
             <div className="flex-1 text-white">
               <h1 className="text-4xl font-bold mb-4">{movie.title}</h1>
 
+              {/* Info */}
               <div className="flex flex-wrap gap-x-6 gap-y-2 text-gray-300 text-sm mb-4">
                 <span>
                   {movie.release_date
@@ -109,16 +119,6 @@ const MovieDetails = () => {
                 )}
               </div>
 
-              {movie.genre_ids && movie.genre_ids.length > 0 && (
-                <p className="text-gray-300 text-sm mb-4">
-                  Genres:{" "}
-                  {movie.genre_ids
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    .map((genre: any) => genre.name)
-                    .join(", ")}
-                </p>
-              )}
-
               <p className="text-gray-200 text-base leading-relaxed mb-6">
                 {movie.overview || "No description available."}
               </p>
@@ -126,9 +126,15 @@ const MovieDetails = () => {
               <div className="flex gap-4">
                 <button
                   onClick={handleAddWatchlist}
-                  className="py-2.5 px-6 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors duration-200"
+                  disabled={isInWatchlist}
+                  className={`py-2.5 px-6 font-semibold rounded-lg transition-colors duration-200 flex items-center gap-2 ${
+                    isInWatchlist
+                      ? "bg-gray-700 text-gray-300 cursor-not-allowed"
+                      : "bg-red-600 text-white hover:bg-red-700"
+                  }`}
                 >
-                  Add to Watchlist
+                  {isInWatchlist && <FaCheck />}
+                  {isInWatchlist ? "In Watchlist" : "Add to Watchlist"}
                 </button>
               </div>
             </div>
@@ -136,6 +142,7 @@ const MovieDetails = () => {
         </div>
       </div>
 
+      {/* Modal */}
       {showModal && (
         <Modal
           isOpen={showModal}

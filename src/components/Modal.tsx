@@ -16,7 +16,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
 
   const handleClose = () => {
     setShow(false);
-    setTimeout(() => onClose(), 300); // Wait for animation
+    setTimeout(() => onClose(), 300); 
   };
 
   if (!isOpen && !show) return null;
