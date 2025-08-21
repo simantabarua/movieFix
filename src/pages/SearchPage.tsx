@@ -4,7 +4,6 @@ import type { IMovie } from "../types/movie";
 import bg from "../assets/searchbg.jpg";
 import MovieCard from "../components/MovieCard";
 import { FaSearch } from "react-icons/fa";
-import Loader from "../components/Loader";
 
 type SearchForm = {
   query: string;
@@ -70,7 +69,13 @@ const SearchPage = () => {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto w-full pb-20 px-6">
-        {isLoading && <Loader />}
+        {isLoading && (
+          <div className="flex items-center justify-center min-h-[30vh] animate-fadeIn">
+            <div className="relative flex items-center justify-center">
+              <div className="w-14 h-14 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          </div>
+        )}
 
         {!isLoading && data?.results?.length === 0 && query && (
           <p className="text-gray-400 text-center text-lg animate-fadeIn">

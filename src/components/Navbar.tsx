@@ -20,7 +20,7 @@ export default function Navbar() {
   return (
     <nav
       className="bg-black text-white fixed w-full top-0 z-50 bg-opacity-90
-     backdrop-blur-sm transition-all duration-300 px-8 md:px-0"
+     backdrop-blur-sm transition-all duration-300 px-4 md:px-0"
     >
       <div className="max-w-7xl mx-auto px-4 md:px-0 py-4">
         <div className="flex items-center justify-between">

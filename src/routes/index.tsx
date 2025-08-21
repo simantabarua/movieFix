@@ -6,6 +6,7 @@ import MainLayout from "../layout/MainLayout";
 import PrivateRoute from "../components/PrivateRoute";
 import Movies from "../pages/Movies";
 import WatchListPage from "../pages/WatchListPage";
+import NotFound from "../pages/404";
 
 export const router = createBrowserRouter([
   {
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
         ),
       },
       { path: "login", Component: LoginPage },
+      { path: "*", Component: NotFound },
     ],
   },
 ]);
