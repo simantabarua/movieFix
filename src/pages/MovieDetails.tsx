@@ -142,7 +142,6 @@ const MovieDetails = () => {
         </div>
       </div>
 
-      {/* Modal */}
       {showModal && (
         <Modal
           isOpen={showModal}
@@ -153,7 +152,9 @@ const MovieDetails = () => {
           {modalMessage.includes("log in") && (
             <div className="mt-4 flex justify-center gap-4">
               <button
-                onClick={() => navigate("/login")}
+                onClick={() =>
+                  navigate("/login", { state: { from: location.pathname } })
+                }
                 className="py-2 px-4 bg-red-600 rounded hover:bg-red-700 text-white font-medium transition"
               >
                 Login
